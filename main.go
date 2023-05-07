@@ -65,6 +65,7 @@ func NewDiscordBot(botToken *string, l *zap.Logger) (*discordBot, error) {
 	}
 	// Set up commands
 	for i, command := range bot.discordCommand.CommandList() {
+		bot.Log().Info("adding command to discord", zap.String("command", command.Name))
 		cmd, err := bot.Session().ApplicationCommandCreate(bot.Session().State.User.ID, guildId, command)
 		if err != nil {
 			bot.Log().Error("Failed to create command", zap.String("commandName", command.Name))
@@ -108,6 +109,8 @@ func main() {
 	}
 
 	defer bot.Session().Close()
+
+	bot.Session().Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildMessages | discordgo.IntentsGuildVoiceStates
 
 	signal.Notify(bot.Stop(), os.Interrupt)
 	fmt.Printf("Press Ctrl+C to exit")
